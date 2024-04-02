@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Money Tracker App</title>
+</head>
+<body>
+  <h1>Money Tracker App</h1>
+    <form id="mainbox" action="/add" method="POST">
+      <div class="input-section">
+            <label for="Category">Category: </label>
+            <select id="Category" name="Category">
+                <option value="Expense">Expense</option>
+                <option value="Income">Income</option>
+            </select>
+            <label for="Amount">Amount:</label>
+            <input type="number" id="Amount" name="Amount">
+            <label for="Info">Info:</label>
+            <input type="text" id="Info" name="Info">
+            <label for="Date">Date:</label>
+            <input type="date" id="Date" name="Date">
+            <button id="add_btn">Add</button>
+      </div>
+    </form>
+
+    <div class="expenses-list">
+        <h2>Expenses and Incomes List</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Info</th>
+                    <th>Date</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody id="expense-table-body">
+
+            </tbody>
+            <tfoot>
+                <td>Total:</td>
+                <td id="total-amount"></td>
+                <td></td>
+                <td></td>
+                <td></td>
+            </tfoot>
+        </table>
+    </div>
+    <script src="index.js"></script>
+</body>
+<style>
+    * {
+        font-family: Georgia, 'Times New Roman', Times, serif;
+      }
+      
+      body {
+        margin: 0;
+        background-image: linear-gradient(#4ebbe6,#acd9f7);
+      }
+      
+      h1, h2 {
+        color: rgb(72, 1, 45);
+        text-align: center;
+        
+
+      }
+      
+      .input-section {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding: 10%;
+      }
+      
+      .input-section label {
+        font-weight: bold;
+        margin-right: 10px;
+      }
+      .input-section select,
+      .input-section input{
+        border-radius: 25px;
+        width: 15%;
+        height: 20%;
+        padding: 5px;
+        margin-right: 10px;
+      }
+      
+      .input-section input[type="number"],
+      .input-section input[type="date"] {
+        padding: 5px;
+        margin-right: 10px;
+      }
+      
+      .input-section button {
+        padding: 15px 30px;
+        background-color: #009879;
+        color: white;
+        border: none;
+        border-radius: 25px;
+        cursor: pointer;
+      }
+      .input-section button:hover {
+        background-color: #8fee9a;
+        color: black;
+      }
+      
+      .expenses-list {
+        margin: 10px;
+      }
+      
+      table {
+        width: 80%;
+        border-collapse: collapse;
+        margin-left: 12%;
+        margin-top: 80px;
+        margin-bottom: 80px;
+        font-size: 1em;
+        font-family: sans-serif;
+        background: white;
+      }
+      
+      th {
+        background-color: #009879;
+        color: #ffffff;
+        font-weight: bold;
+        text-align: left;
+        padding: 10px;
+      }
+      
+      td {
+        border-bottom: 1px solid #dddddd;
+        padding: 10px;
+      }
+      
+      tr:hover {
+        background-color: #8fee9a;
+      }
+      
+      .new-expense {
+        background-color: rgba(144, 238, 144, 0.5); /* Light green background */
+      }
+      
+      .deleted-row {
+        animation: fadeOut 0.5s ease forwards;
+      }
+      
+      @keyframes fadeOut {
+        0% { opacity: 1; }
+        100% { opacity: 0; }
+      }
+      
+</style>
+<script>
+        let expenses =[];
+        let totalAmount = 0;
+        
+        const categorySelect = document.getElementById('Category')
+        const amountInput = document.getElementById('Amount')
+        const InfoInput = document.getElementById('Info')
+        const dateInput = document.getElementById('Date')
+        const addBtn = document.getElementById('add_btn')
+        const expenseTableBody = document.getElementById('expense-table-body')
+        const totalAmountCell = document.getElementById('total-amount')
+        
+        addBtn.addEventListener('click', function(){
+            const category = categorySelect.value;
+            const info=InfoInput.value;
+            const amount = Number(amountInput.value);
+            const date= dateInput.value;
+        
+            if(category === ''){
+                alert('please select a category');
+                return;
+            }
+            if(isNaN(amount) || amount <= 0){
+                alert('please enter a valid amount');
+                return;
+            }
+            if(info ===''){
+                alert('please enter a valid amount info');
+                return;
+            }
+            if(date ===''){
+                alert('please select a date');
+                return;
+            }
+            expenses.push({category,amount,date})
+        
+            expenses.push({category,amount,info,date})
+            if(category === 'Income'){
+                totalAmount+=amount;
+            }
+            if(category === 'Expense'){
+                totalAmount-=amount;
+            }
+             totalAmountCell.textContent = totalAmount;
+        
+            const newRow = expenseTableBody.insertRow();
+        
+            const categoryCell = newRow.insertCell();
+            const AmountCell = newRow.insertCell();
+            const InfoCell = newRow.insertCell();
+            const dateCell = newRow.insertCell();
+            const deleteCell = newRow.insertCell();
+        
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent ='Delete';
+            deleteBtn.classList.add('delete-btn');
+            deleteBtn.addEventListener('click', function(){
+               expenses.splice(expenses.indexOf(expense),1);
+               if(category === 'Income'){
+                   totalAmount-=amount;
+               }
+               if(category === 'Expense'){
+                   totalAmount+=amount;
+               }
+        
+               totalAmountCell.textContent=totalAmount;
+               expenseTableBody.removeChild(newRow)
+            })
+        
+            const expense= expenses[expenses.length - 1];
+            categoryCell.textContent=expense.category;
+            AmountCell.textContent=expense.amount;
+            InfoCell.textContent=expense.info;
+            dateCell.textContent=expense.date;
+            deleteCell.appendChild(deleteBtn);
+        
+        });
+        for(const exepense of expenses){
+            for(const expense of expenses){
+                if(category === 'Income'){
+                    totalAmount+=amount;
+                }
+                if(category === 'Expense'){
+                    totalAmount-=amount;
+                }
+                 totalAmountCell.textContent = totalAmount;
+            
+                 const newRow = expenseTableBody.insertRow();
+            
+                 const categoryCell = newRow.insertCell();
+                 const AmountCell = newRow.insertCell();
+                 const InfoCell = newRow.insertCell();
+                 const dateCell = newRow.insertCell();
+                 const deleteCell = newRow.insertCell();
+            
+                 const deleteBtn = document.createElement('button');
+                 deleteBtn.textContent ='Delete';
+                 deleteBtn.classList.add('delete-btn');
+                 deleteBtn.addEventListener('click', function(){
+                    expenses.splice(expenses.indexOf(expense),1);
+                    if(category === 'Income'){
+                        totalAmount-=amount;
+                    } 
+                    if(category === 'Expense'){
+                        totalAmount+=amount;
+                    }
+            
+                    totalAmountCell.textContent=totalAmount;
+                    expenseTableBody.removeChild(new Row)
+                 })
+                 const expense = expenses[expenses.length-1];
+                 categoryCell.textContent=expense.category;
+                 AmountCell.textContent=expense.amount;
+                 InfoCell.textContent=expense.info;
+                 dateCell.textContent=expense.date;
+                 deleteCell.appendChild(deleteBtn);
+        }}
+</script>
+</html>
